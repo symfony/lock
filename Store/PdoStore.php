@@ -313,7 +313,8 @@ class PdoStore implements StoreInterface
         $sql = "DELETE FROM $this->table WHERE $this->expirationCol <= {$this->getCurrentTimestampStatement()}";
 
         $conn = $this->getConnection();
-        if (method_exists($conn, 'executeStatement')) {
+
+        if (!$conn instanceof \PDO && method_exists($conn, 'executeStatement')) {
             $conn->executeStatement($sql);
         } else {
             $conn->exec($sql);
