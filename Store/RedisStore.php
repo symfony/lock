@@ -29,7 +29,7 @@ class RedisStore implements SharedLockStoreInterface
 {
     use ExpiringStoreTrait;
 
-    private const NO_SCRIPT_ERROR_MESSAGE_PREFIX = 'NOSCRIPT No matching script.';
+    private const NO_SCRIPT_ERROR_MESSAGE_PREFIX = 'NOSCRIPT';
 
     private bool $supportTime;
 
