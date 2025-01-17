@@ -29,7 +29,7 @@ class RedisStore implements SharedLockStoreInterface
 {
     use ExpiringStoreTrait;
 
-    private const NO_SCRIPT_ERROR_MESSAGE = 'NOSCRIPT No matching script. Please use EVAL.';
+    private const NO_SCRIPT_ERROR_MESSAGE_PREFIX = 'NOSCRIPT';
 
     private bool $supportTime;
 
@@ -234,7 +234,7 @@ class RedisStore implements SharedLockStoreInterface
             $this->redis->clearLastError();
 
             $result = $this->redis->evalSha($scriptSha, array_merge([$resource], $args), 1);
-            if (self::NO_SCRIPT_ERROR_MESSAGE === $err = $this->redis->getLastError()) {
+            if (null !== ($err = $this->redis->getLastError()) && str_starts_with($err, self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
                 $this->redis->clearLastError();
 
                 if ($this->redis instanceof \RedisCluster) {
@@ -263,7 +263,7 @@ class RedisStore implements SharedLockStoreInterface
             $client = $this->redis->_instance($this->redis->_target($resource));
             $client->clearLastError();
             $result = $client->evalSha($scriptSha, array_merge([$resource], $args), 1);
-            if (self::NO_SCRIPT_ERROR_MESSAGE === $err = $client->getLastError()) {
+            if (null !== ($err = $this->redis->getLastError()) && str_starts_with($err, self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
                 $client->clearLastError();
 
                 $client->script('LOAD', $script);
@@ -285,7 +285,7 @@ class RedisStore implements SharedLockStoreInterface
         \assert($this->redis instanceof \Predis\ClientInterface);
 
         $result = $this->redis->evalSha($scriptSha, 1, $resource, ...$args);
-        if ($result instanceof Error && self::NO_SCRIPT_ERROR_MESSAGE === $result->getMessage()) {
+        if ($result instanceof Error && str_starts_with($result->getMessage(), self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
             $result = $this->redis->script('LOAD', $script);
             if ($result instanceof Error) {
                 throw new LockStorageException($result->getMessage());
