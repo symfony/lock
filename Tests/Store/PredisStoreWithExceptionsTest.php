@@ -12,18 +12,13 @@
 namespace Symfony\Component\Lock\Tests\Store;
 
 /**
- * @author Jérémy Derussé <jeremy@derusse.com>
- *
  * @group integration
  */
-class PredisStoreTest extends AbstractRedisStoreTestCase
+class PredisStoreWithExceptionsTest extends AbstractRedisStoreTestCase
 {
     public static function setUpBeforeClass(): void
     {
-        $redis = new \Predis\Client(
-            array_combine(['host', 'port'], explode(':', getenv('REDIS_HOST')) + [1 => null]),
-            ['exceptions' => false],
-        );
+        $redis = new \Predis\Client(array_combine(['host', 'port'], explode(':', getenv('REDIS_HOST')) + [1 => null]));
         try {
             $redis->connect();
         } catch (\Exception $e) {
@@ -33,10 +28,7 @@ class PredisStoreTest extends AbstractRedisStoreTestCase
 
     protected function getRedisConnection(): \Predis\Client
     {
-        $redis = new \Predis\Client(
-            array_combine(['host', 'port'], explode(':', getenv('REDIS_HOST')) + [1 => null]),
-            ['exceptions' => false],
-        );
+        $redis = new \Predis\Client(array_combine(['host', 'port'], explode(':', getenv('REDIS_HOST')) + [1 => null]));
         $redis->connect();
 
         return $redis;
