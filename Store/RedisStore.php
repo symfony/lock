@@ -12,6 +12,7 @@
 namespace Symfony\Component\Lock\Store;
 
 use Predis\Response\Error;
+use Predis\Response\ServerException;
 use Relay\Relay;
 use Symfony\Component\Lock\Exception\InvalidTtlException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
@@ -284,21 +285,18 @@ class RedisStore implements SharedLockStoreInterface
 
         \assert($this->redis instanceof \Predis\ClientInterface);
 
-        $result = $this->redis->evalSha($scriptSha, 1, $resource, ...$args);
-        if ($result instanceof Error && str_starts_with($result->getMessage(), self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
-            $result = $this->redis->script('LOAD', $script);
-            if ($result instanceof Error) {
-                throw new LockStorageException($result->getMessage());
+        try {
+            return $this->handlePredisError(fn () => $this->redis->evalSha($scriptSha, 1, $resource, ...$args));
+        } catch (LockStorageException $e) {
+            // Fallthrough only if we need to load the script
+            if (!str_starts_with($e->getMessage(), self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
+                throw $e;
             }
-
-            $result = $this->redis->evalSha($scriptSha, 1, $resource, ...$args);
         }
 
-        if ($result instanceof Error) {
-            throw new LockStorageException($result->getMessage());
-        }
+        $this->handlePredisError(fn () => $this->redis->script('LOAD', $script));
 
-        return $result;
+        return $this->handlePredisError(fn () => $this->redis->evalSha($scriptSha, 1, $resource, ...$args));
     }
 
     private function getUniqueToken(Key $key): string
@@ -346,5 +344,27 @@ class RedisStore implements SharedLockStoreInterface
             local now = tonumber(ARGV[1])
             now = math.floor(now * 1000)
         ';
+    }
+
+    /**
+     * @template T
+     *
+     * @param callable(): T $callback
+     *
+     * @return T
+     */
+    private function handlePredisError(callable $callback): mixed
+    {
+        try {
+            $result = $callback();
+        } catch (ServerException $e) {
+            throw new LockStorageException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        if ($result instanceof Error) {
+            throw new LockStorageException($result->getMessage());
+        }
+
+        return $result;
     }
 }
