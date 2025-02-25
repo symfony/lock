@@ -14,6 +14,7 @@ namespace Symfony\Component\Lock\Store;
 use Predis\Response\Error;
 use Predis\Response\ServerException;
 use Relay\Relay;
+use Relay\Cluster as RelayCluster;
 use Symfony\Component\Lock\Exception\InvalidTtlException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Exception\LockStorageException;
@@ -38,7 +39,7 @@ class RedisStore implements SharedLockStoreInterface
      * @param float $initialTtl The expiration delay of locks in seconds
      */
     public function __construct(
-        private \Redis|Relay|\RedisArray|\RedisCluster|\Predis\ClientInterface $redis,
+        private \Redis|Relay|RelayCluster|\RedisArray|\RedisCluster|\Predis\ClientInterface $redis,
         private float $initialTtl = 300.0,
     ) {
         if ($initialTtl <= 0) {
@@ -231,14 +232,14 @@ class RedisStore implements SharedLockStoreInterface
     {
         $scriptSha = sha1($script);
 
-        if ($this->redis instanceof \Redis || $this->redis instanceof Relay || $this->redis instanceof \RedisCluster) {
+        if ($this->redis instanceof \Redis || $this->redis instanceof Relay || $this->redis instanceof RelayCluster || $this->redis instanceof \RedisCluster) {
             $this->redis->clearLastError();
 
             $result = $this->redis->evalSha($scriptSha, array_merge([$resource], $args), 1);
             if (null !== ($err = $this->redis->getLastError()) && str_starts_with($err, self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
                 $this->redis->clearLastError();
 
-                if ($this->redis instanceof \RedisCluster) {
+                if ($this->redis instanceof \RedisCluster || $this->redis instanceof RelayCluster) {
                     foreach ($this->redis->_masters() as $master) {
                         $this->redis->script($master, 'LOAD', $script);
                     }
