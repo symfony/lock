@@ -13,8 +13,8 @@ namespace Symfony\Component\Lock\Store;
 
 use Predis\Response\Error;
 use Predis\Response\ServerException;
-use Relay\Relay;
 use Relay\Cluster as RelayCluster;
+use Relay\Relay;
 use Symfony\Component\Lock\Exception\InvalidTtlException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Exception\LockStorageException;
