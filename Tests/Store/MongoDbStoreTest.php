@@ -21,6 +21,7 @@ use Symfony\Component\Lock\Exception\InvalidArgumentException;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\MongoDbStore;
+use Symfony\Component\Lock\Test\AbstractStoreTestCase;
 
 require_once __DIR__.'/stubs/mongodb.php';
 
