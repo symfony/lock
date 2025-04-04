@@ -11,10 +11,12 @@
 
 namespace Symfony\Component\Lock\Tests\Store;
 
+use AsyncAws\DynamoDb\DynamoDbClient;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\AbstractAdapter;
 use Symfony\Component\Cache\Adapter\MemcachedAdapter;
+use Symfony\Component\Lock\Bridge\DynamoDb\Store\DynamoDbStore;
 use Symfony\Component\Lock\Store\DoctrineDbalPostgreSqlStore;
 use Symfony\Component\Lock\Store\DoctrineDbalStore;
 use Symfony\Component\Lock\Store\FlockStore;
@@ -87,6 +89,9 @@ class StoreFactoryTest extends TestCase
             yield ['pgsql+advisory://server.com/test', DoctrineDbalPostgreSqlStore::class];
             yield ['postgres+advisory://server.com/test', DoctrineDbalPostgreSqlStore::class];
             yield ['postgresql+advisory://server.com/test', DoctrineDbalPostgreSqlStore::class];
+        }
+        if (class_exists(DynamoDbClient::class)) {
+            yield ['dynamodb://default', DynamoDbStore::class];
         }
 
         yield ['in-memory', InMemoryStore::class];

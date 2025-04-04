@@ -14,6 +14,7 @@ namespace Symfony\Component\Lock\Tests\Store;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\Store\StoreFactory;
 use Symfony\Component\Lock\Store\ZookeeperStore;
+use Symfony\Component\Lock\Test\AbstractStoreTestCase;
 
 /**
  * @author Ganesh Chandrasekaran <gchandrasekaran@wayfair.com>
