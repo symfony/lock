@@ -264,7 +264,7 @@ class RedisStore implements SharedLockStoreInterface
             $client = $this->redis->_instance($this->redis->_target($resource));
             $client->clearLastError();
             $result = $client->evalSha($scriptSha, array_merge([$resource], $args), 1);
-            if (null !== ($err = $this->redis->getLastError()) && str_starts_with($err, self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
+            if (null !== ($err = $client->getLastError()) && str_starts_with($err, self::NO_SCRIPT_ERROR_MESSAGE_PREFIX)) {
                 $client->clearLastError();
 
                 $client->script('LOAD', $script);
