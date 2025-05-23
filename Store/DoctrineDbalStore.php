@@ -106,7 +106,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
 
         try {
             $this->conn->executeStatement($sql, [
-                $this->getHashedKey($key),
+                $this->getKeyName($key),
                 $this->getUniqueToken($key),
             ], [
                 ParameterType::STRING,
@@ -119,7 +119,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
 
             try {
                 $this->conn->executeStatement($sql, [
-                    $this->getHashedKey($key),
+                    $this->getKeyName($key),
                     $this->getUniqueToken($key),
                 ], [
                     ParameterType::STRING,
@@ -151,7 +151,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
         $result = $this->conn->executeQuery($sql, [
             $ttl,
             $uniqueToken,
-            $this->getHashedKey($key),
+            $this->getKeyName($key),
             $uniqueToken,
         ], [
             ParameterType::INTEGER,
@@ -171,7 +171,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
     public function delete(Key $key): void
     {
         $this->conn->delete($this->table, [
-            $this->idCol => $this->getHashedKey($key),
+            $this->idCol => $this->getKeyName($key),
             $this->tokenCol => $this->getUniqueToken($key),
         ]);
     }
@@ -180,7 +180,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
     {
         $sql = "SELECT 1 FROM $this->table WHERE $this->idCol = ? AND $this->tokenCol = ? AND $this->expirationCol > {$this->getCurrentTimestampStatement()}";
         $result = $this->conn->fetchOne($sql, [
-            $this->getHashedKey($key),
+            $this->getKeyName($key),
             $this->getUniqueToken($key),
         ], [
             ParameterType::STRING,
