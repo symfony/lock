@@ -20,6 +20,8 @@ use MongoDB\Driver\Command;
 use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\Manager;
 use MongoDB\Driver\Query;
+use MongoDB\Driver\ReadPreference;
+use MongoDB\Driver\WriteConcern;
 use MongoDB\Exception\DriverRuntimeException;
 use MongoDB\Exception\InvalidArgumentException as MongoInvalidArgumentException;
 use MongoDB\Exception\UnsupportedException;
@@ -61,9 +63,9 @@ class MongoDbStore implements PersistingStoreInterface
     private float $initialTtl;
 
     /**
-     * @param Collection|Client|Manager|string $mongo      An instance of a Collection or Client or URI @see https://docs.mongodb.com/manual/reference/connection-string/
-     * @param array                            $options    See below
-     * @param float                            $initialTtl The expiration delay of locks in seconds
+     * @param Collection|Database|Client|Manager|string $mongo      An instance of a Collection or Client or URI @see https://docs.mongodb.com/manual/reference/connection-string/
+     * @param array                                     $options    See below
+     * @param float                                     $initialTtl The expiration delay of locks in seconds
      *
      * @throws InvalidArgumentException If required options are not provided
      * @throws InvalidTtlException      When the initial ttl is not valid
@@ -89,8 +91,10 @@ class MongoDbStore implements PersistingStoreInterface
      * to 0.0 and optionally leverage
      * self::createTtlIndex(int $expireAfterSeconds = 0).
      *
-     * writeConcern and readConcern are not specified by MongoDbStore meaning the connection's settings will take effect.
-     * readPreference is primary for all queries.
+     * readConcern is not specified by MongoDbStore meaning the connection's settings will take effect.
+     * writeConcern is majority for all update queries.
+     * readPreference is primary for all read queries.
+     *
      * @see https://docs.mongodb.com/manual/applications/replication/
      */
     public function __construct(Collection|Database|Client|Manager|string $mongo, array $options = [], float $initialTtl = 300.0)
@@ -286,7 +290,11 @@ class MongoDbStore implements PersistingStoreInterface
             ['limit' => 1]
         );
 
-        $this->getManager()->executeBulkWrite($this->namespace, $write);
+        $this->getManager()->executeBulkWrite(
+            $this->namespace,
+            $write,
+            ['writeConcern' => new WriteConcern(WriteConcern::MAJORITY)]
+        );
     }
 
     public function exists(Key $key): bool
@@ -303,7 +311,9 @@ class MongoDbStore implements PersistingStoreInterface
                 'limit' => 1,
                 'projection' => ['_id' => 1],
             ]
-        ));
+        ), [
+            'readPreference' => new ReadPreference(ReadPreference::PRIMARY)
+        ]);
 
         return [] !== $cursor->toArray();
     }
@@ -345,7 +355,11 @@ class MongoDbStore implements PersistingStoreInterface
             ]
         );
 
-        $this->getManager()->executeBulkWrite($this->namespace, $write);
+        $this->getManager()->executeBulkWrite(
+            $this->namespace,
+            $write,
+            ['writeConcern' => new WriteConcern(WriteConcern::MAJORITY)]
+        );
     }
 
     private function isDuplicateKeyException(BulkWriteException $e): bool
