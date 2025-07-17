@@ -14,7 +14,6 @@ namespace Symfony\Component\Lock\Store;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\ParameterType;
@@ -219,11 +218,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
         $table->addColumn($this->tokenCol, 'string', ['length' => 44]);
         $table->addColumn($this->expirationCol, 'integer', ['unsigned' => true]);
 
-        if (class_exists(PrimaryKeyConstraint::class)) {
-            $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted($this->idCol))], true));
-        } else {
-            $table->setPrimaryKey([$this->idCol]);
-        }
+        $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted($this->idCol))], true));
     }
 
     /**
@@ -243,16 +238,9 @@ class DoctrineDbalStore implements PersistingStoreInterface
     {
         $platform = $this->conn->getDatabasePlatform();
 
-        if (interface_exists(Exception::class)) {
-            // DBAL 4+
-            $sqlitePlatformClass = 'Doctrine\DBAL\Platforms\SQLitePlatform';
-        } else {
-            $sqlitePlatformClass = 'Doctrine\DBAL\Platforms\SqlitePlatform';
-        }
-
         return match (true) {
             $platform instanceof \Doctrine\DBAL\Platforms\AbstractMySQLPlatform => 'UNIX_TIMESTAMP()',
-            $platform instanceof $sqlitePlatformClass => 'strftime(\'%s\',\'now\')',
+            $platform instanceof \Doctrine\DBAL\Platforms\SQLitePlatform => 'strftime(\'%s\',\'now\')',
             $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform => 'CAST(EXTRACT(epoch FROM NOW()) AS INT)',
             $platform instanceof \Doctrine\DBAL\Platforms\OraclePlatform => '(SYSDATE - TO_DATE(\'19700101\',\'yyyymmdd\'))*86400 - TO_NUMBER(SUBSTR(TZ_OFFSET(sessiontimezone), 1, 3))*3600',
             $platform instanceof \Doctrine\DBAL\Platforms\SQLServerPlatform => 'DATEDIFF(s, \'1970-01-01\', GETUTCDATE())',
@@ -267,16 +255,9 @@ class DoctrineDbalStore implements PersistingStoreInterface
     {
         $platform = $this->conn->getDatabasePlatform();
 
-        if (interface_exists(Exception::class)) {
-            // DBAL 4+
-            $sqlitePlatformClass = 'Doctrine\DBAL\Platforms\SQLitePlatform';
-        } else {
-            $sqlitePlatformClass = 'Doctrine\DBAL\Platforms\SqlitePlatform';
-        }
-
         return match (true) {
             $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform,
-            $platform instanceof $sqlitePlatformClass,
+            $platform instanceof \Doctrine\DBAL\Platforms\SQLitePlatform,
             $platform instanceof \Doctrine\DBAL\Platforms\SQLServerPlatform => true,
             default => false,
         };
