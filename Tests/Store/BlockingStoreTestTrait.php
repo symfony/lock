@@ -11,6 +11,9 @@
 
 namespace Symfony\Component\Lock\Tests\Store;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresFunction;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\PersistingStoreInterface;
@@ -31,13 +34,11 @@ trait BlockingStoreTestTrait
      * This test is time sensible: the $clockDelay could be adjust.
      *
      * It also fails when run with the global ./phpunit test suite.
-     *
-     * @group transient
-     *
-     * @requires extension pcntl
-     * @requires extension posix
-     * @requires function pcntl_sigwaitinfo
      */
+    #[Group('transient')]
+    #[RequiresPhpExtension('pcntl')]
+    #[RequiresPhpExtension('posix')]
+    #[RequiresFunction('pcntl_sigwaitinfo')]
     public function testBlockingLocks()
     {
         // Amount of microseconds we should wait without slowing things down too much

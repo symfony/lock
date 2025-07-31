@@ -19,15 +19,17 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Schema\Schema;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\DoctrineDbalStore;
 
 /**
  * @author Jérémy Derussé <jeremy@derusse.com>
- *
- * @requires extension pdo_sqlite
  */
+#[RequiresPhpExtension('pdo_sqlite')]
 class DoctrineDbalStoreTest extends AbstractStoreTestCase
 {
     use ExpiringStoreTestTrait;
@@ -70,9 +72,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $this->markTestSkipped('Pdo expects a TTL greater than 1 sec. Simulating a slow network is too hard');
     }
 
-    /**
-     * @dataProvider provideDsnWithSQLite
-     */
+    #[DataProvider('provideDsnWithSQLite')]
     public function testDsnWithSQLite(string $dsn, ?string $file = null)
     {
         $key = new Key(__METHOD__);
@@ -97,11 +97,8 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         yield 'SQLite in memory' => ['sqlite://localhost/:memory:'];
     }
 
-    /**
-     * @requires extension pdo_pgsql
-     *
-     * @group integration
-     */
+    #[RequiresPhpExtension('pdo_pgsql')]
+    #[Group('integration')]
     public function testDsnWithPostgreSQL()
     {
         if (!$host = getenv('POSTGRES_HOST')) {
@@ -123,9 +120,8 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
     /**
      * @param class-string<AbstractPlatform>
-     *
-     * @dataProvider providePlatforms
      */
+    #[DataProvider('providePlatforms')]
     public function testCreatesTableInTransaction(string $platform)
     {
         $conn = $this->createMock(Connection::class);

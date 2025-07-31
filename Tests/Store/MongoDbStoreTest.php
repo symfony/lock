@@ -17,6 +17,9 @@ use MongoDB\Database;
 use MongoDB\Driver\Command;
 use MongoDB\Driver\Exception\ConnectionTimeoutException;
 use MongoDB\Driver\Manager;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Symfony\Component\Lock\Exception\InvalidArgumentException;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\PersistingStoreInterface;
@@ -26,11 +29,9 @@ require_once __DIR__.'/stubs/mongodb.php';
 
 /**
  * @author Joe Bennett <joe@assimtech.com>
- *
- * @requires extension mongodb
- *
- * @group integration
  */
+#[RequiresPhpExtension('mongodb')]
+#[Group('integration')]
 class MongoDbStoreTest extends AbstractStoreTestCase
 {
     use ExpiringStoreTestTrait;
@@ -79,9 +80,7 @@ class MongoDbStoreTest extends AbstractStoreTestCase
         $this->assertContains('expires_at_1', $indexes);
     }
 
-    /**
-     * @dataProvider provideConstructorArgs
-     */
+    #[DataProvider('provideConstructorArgs')]
     public function testConstructionMethods($mongo, array $options)
     {
         $key = new Key(__METHOD__);
@@ -157,9 +156,7 @@ class MongoDbStoreTest extends AbstractStoreTestCase
         $this->assertSame('lock_uri', $options['collection']);
     }
 
-    /**
-     * @dataProvider provideInvalidConstructorArgs
-     */
+    #[DataProvider('provideInvalidConstructorArgs')]
     public function testInvalidConstructionMethods($mongo, array $options)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -178,9 +175,7 @@ class MongoDbStoreTest extends AbstractStoreTestCase
         yield ['mongodb://localhost/', []];
     }
 
-    /**
-     * @dataProvider provideUriCollectionStripArgs
-     */
+    #[DataProvider('provideUriCollectionStripArgs')]
     public function testUriCollectionStrip(string $uri, array $options, string $driverUri)
     {
         $store = new MongoDbStore($uri, $options);
