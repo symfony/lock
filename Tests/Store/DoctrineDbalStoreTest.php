@@ -14,7 +14,6 @@ namespace Symfony\Component\Lock\Tests\Store;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
