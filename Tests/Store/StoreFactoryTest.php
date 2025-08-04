@@ -12,6 +12,7 @@
 namespace Symfony\Component\Lock\Tests\Store;
 
 use Doctrine\DBAL\Connection;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\AbstractAdapter;
 use Symfony\Component\Cache\Adapter\MemcachedAdapter;
@@ -32,9 +33,7 @@ use Symfony\Component\Lock\Store\StoreFactory;
  */
 class StoreFactoryTest extends TestCase
 {
-    /**
-     * @dataProvider validConnections
-     */
+    #[DataProvider('validConnections')]
     public function testCreateStore($connection, string $expectedStoreClass)
     {
         $store = StoreFactory::createStore($connection);
