@@ -17,6 +17,11 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQL94Platform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Schema\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -166,25 +171,25 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
     public static function providePlatforms(): \Generator
     {
-        yield [\Doctrine\DBAL\Platforms\PostgreSQLPlatform::class];
+        yield [PostgreSQLPlatform::class];
 
         // DBAL < 4
-        if (class_exists(\Doctrine\DBAL\Platforms\PostgreSQL94Platform::class)) {
-            yield [\Doctrine\DBAL\Platforms\PostgreSQL94Platform::class];
+        if (class_exists(PostgreSQL94Platform::class)) {
+            yield [PostgreSQL94Platform::class];
         }
 
         if (interface_exists(Exception::class)) {
             // DBAL 4+
-            yield [\Doctrine\DBAL\Platforms\SQLitePlatform::class];
+            yield [SQLitePlatform::class];
         } else {
-            yield [\Doctrine\DBAL\Platforms\SqlitePlatform::class];
+            yield [SQLitePlatform::class];
         }
 
-        yield [\Doctrine\DBAL\Platforms\SQLServerPlatform::class];
+        yield [SQLServerPlatform::class];
 
         // DBAL < 4
-        if (class_exists(\Doctrine\DBAL\Platforms\SQLServer2012Platform::class)) {
-            yield [\Doctrine\DBAL\Platforms\SQLServer2012Platform::class];
+        if (class_exists(SQLServer2012Platform::class)) {
+            yield [SQLServer2012Platform::class];
         }
     }
 
