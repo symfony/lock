@@ -180,9 +180,9 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
         if (interface_exists(Exception::class)) {
             // DBAL 4+
-            yield [SQLitePlatform::class];
+            yield [\Doctrine\DBAL\Platforms\SQLitePlatform::class];
         } else {
-            yield [SQLitePlatform::class];
+            yield [\Doctrine\DBAL\Platforms\SqlitePlatform::class];
         }
 
         yield [SQLServerPlatform::class];
