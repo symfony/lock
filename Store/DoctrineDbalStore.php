@@ -17,6 +17,10 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
+use Doctrine\DBAL\Platforms\OraclePlatform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
@@ -239,11 +243,11 @@ class DoctrineDbalStore implements PersistingStoreInterface
         $platform = $this->conn->getDatabasePlatform();
 
         return match (true) {
-            $platform instanceof \Doctrine\DBAL\Platforms\AbstractMySQLPlatform => 'UNIX_TIMESTAMP(NOW(6))',
-            $platform instanceof \Doctrine\DBAL\Platforms\SQLitePlatform => "(julianday('now') - 2440587.5) * 86400.0",
-            $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform => 'CAST(EXTRACT(epoch FROM NOW()) AS DOUBLE PRECISION)',
-            $platform instanceof \Doctrine\DBAL\Platforms\OraclePlatform => "(CAST(systimestamp AT TIME ZONE 'UTC' AS DATE) - DATE '1970-01-01') * 86400 + TO_NUMBER(TO_CHAR(systimestamp AT TIME ZONE 'UTC', 'SSSSS.FF'))",
-            $platform instanceof \Doctrine\DBAL\Platforms\SQLServerPlatform => "CAST(DATEDIFF_BIG(ms, '1970-01-01', SYSUTCDATETIME()) AS FLOAT) / 1000.0",
+            $platform instanceof AbstractMySQLPlatform => 'UNIX_TIMESTAMP(NOW(6))',
+            $platform instanceof SQLitePlatform => "(julianday('now') - 2440587.5) * 86400.0",
+            $platform instanceof PostgreSQLPlatform => 'CAST(EXTRACT(epoch FROM NOW()) AS DOUBLE PRECISION)',
+            $platform instanceof OraclePlatform => "(CAST(systimestamp AT TIME ZONE 'UTC' AS DATE) - DATE '1970-01-01') * 86400 + TO_NUMBER(TO_CHAR(systimestamp AT TIME ZONE 'UTC', 'SSSSS.FF'))",
+            $platform instanceof SQLServerPlatform => "CAST(DATEDIFF_BIG(ms, '1970-01-01', SYSUTCDATETIME()) AS FLOAT) / 1000.0",
             default => (new \DateTimeImmutable())->format('U.u'),
         };
     }
@@ -256,9 +260,9 @@ class DoctrineDbalStore implements PersistingStoreInterface
         $platform = $this->conn->getDatabasePlatform();
 
         return match (true) {
-            $platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform,
-            $platform instanceof \Doctrine\DBAL\Platforms\SQLitePlatform,
-            $platform instanceof \Doctrine\DBAL\Platforms\SQLServerPlatform => true,
+            $platform instanceof PostgreSQLPlatform,
+            $platform instanceof SQLitePlatform,
+            $platform instanceof SQLServerPlatform => true,
             default => false,
         };
     }
