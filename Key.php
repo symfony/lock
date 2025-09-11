@@ -90,12 +90,16 @@ final class Key
         return null !== $this->expiringTime && $this->expiringTime <= microtime(true);
     }
 
-    public function __sleep(): array
+    public function __serialize(): array
     {
         if (!$this->serializable) {
             throw new UnserializableKeyException('The key cannot be serialized.');
         }
 
-        return ['resource', 'expiringTime', 'state'];
+        return [
+            'resource' => $this->resource,
+            'expiringTime' => $this->expiringTime,
+            'state' => $this->state,
+        ];
     }
 }
