@@ -1,5 +1,5 @@
 {
-    "name": "symfony/amazon-dynamodb-lock",
+    "name": "symfony/amazon-dynamo-db-lock",
     "type": "symfony-lock-bridge",
     "description": "Symfony Amazon DynamoDb extension Lock Bridge",
     "keywords": [],

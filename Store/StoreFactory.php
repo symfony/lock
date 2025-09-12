@@ -30,7 +30,7 @@ class StoreFactory
     {
         switch (true) {
             case $connection instanceof DynamoDbClient:
-                self::requireBridgeClass(DynamoDbStore::class, 'symfony/amazon-dynamodb-lock');
+                self::requireBridgeClass(DynamoDbStore::class, 'symfony/amazon-dynamo-db-lock');
 
                 return new DynamoDbStore($connection);
 
@@ -68,7 +68,7 @@ class StoreFactory
                 return new SemaphoreStore();
 
             case str_starts_with($connection, 'dynamodb://'):
-                self::requireBridgeClass(DynamoDbStore::class, 'symfony/amazon-dynamodb-lock');
+                self::requireBridgeClass(DynamoDbStore::class, 'symfony/amazon-dynamo-db-lock');
 
                 return new DynamoDbStore($connection);
 
