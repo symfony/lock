@@ -22,6 +22,7 @@ use Symfony\Component\Lock\Store\CombinedStore;
 use Symfony\Component\Lock\Store\RedisStore;
 use Symfony\Component\Lock\Strategy\StrategyInterface;
 use Symfony\Component\Lock\Strategy\UnanimousStrategy;
+use Symfony\Component\Lock\Test\AbstractStoreTestCase;
 
 /**
  * @author Jérémy Derussé <jeremy@derusse.com>

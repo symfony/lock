@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\Store\StoreFactory;
 use Symfony\Component\Lock\Store\ZookeeperStore;
+use Symfony\Component\Lock\Test\AbstractStoreTestCase;
 
 /**
  * @author Ganesh Chandrasekaran <gchandrasekaran@wayfair.com>
