@@ -21,7 +21,8 @@
     },
     "require-dev": {
         "doctrine/dbal": "^4.3",
-        "predis/predis": "^1.1|^2.0"
+        "predis/predis": "^1.1|^2.0",
+        "symfony/serializer": "^6.4|^7.0"
     },
     "conflict": {
         "doctrine/dbal": "<4.3"
