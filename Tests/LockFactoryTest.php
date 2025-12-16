@@ -31,7 +31,7 @@ class LockFactoryTest extends TestCase
         $store
             ->expects($this->exactly(2))
             ->method('save')
-            ->with($this->callback(function ($key) use (&$keys) {
+            ->with($this->callback(static function ($key) use (&$keys) {
                 $keys[] = $key;
 
                 return true;
@@ -60,7 +60,7 @@ class LockFactoryTest extends TestCase
         $store
             ->expects($this->exactly(2))
             ->method('save')
-            ->with($this->callback(function ($key) use (&$keys) {
+            ->with($this->callback(static function ($key) use (&$keys) {
                 $keys[] = $key;
 
                 return true;
