@@ -132,7 +132,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $conn = $this->createMock(Connection::class);
 
         $series = [
-            [$this->stringContains('INSERT INTO'), $this->createMock(TableNotFoundException::class)],
+            [$this->stringContains('INSERT INTO'), $this->createStub(TableNotFoundException::class)],
             [$this->matches('create sql stmt'), 1],
             [$this->stringContains('INSERT INTO'), 1],
         ];
@@ -155,7 +155,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $conn->method('isTransactionActive')
             ->willReturn(true);
 
-        $platform = $this->createMock($platform);
+        $platform = $this->createStub($platform);
         $platform->method(method_exists(AbstractPlatform::class, 'getCreateTablesSQL') ? 'getCreateTablesSQL' : 'getCreateTableSQL')
             ->willReturn(['create sql stmt']);
 
@@ -192,7 +192,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $conn = $this->createMock(Connection::class);
 
         $series = [
-            [$this->stringContains('INSERT INTO'), $this->createMock(TableNotFoundException::class)],
+            [$this->stringContains('INSERT INTO'), $this->createStub(TableNotFoundException::class)],
             [$this->stringContains('INSERT INTO'), 1],
         ];
 
@@ -214,7 +214,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $conn->method('isTransactionActive')
             ->willReturn(true);
 
-        $platform = $this->createMock(AbstractPlatform::class);
+        $platform = $this->createStub(AbstractPlatform::class);
         $platform->method(method_exists(AbstractPlatform::class, 'getCreateTablesSQL') ? 'getCreateTablesSQL' : 'getCreateTableSQL')
             ->willReturn(['create sql stmt']);
 
@@ -233,7 +233,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $conn = $this->createMock(Connection::class);
 
         $series = [
-            [$this->stringContains('INSERT INTO'), $this->createMock(TableNotFoundException::class)],
+            [$this->stringContains('INSERT INTO'), $this->createStub(TableNotFoundException::class)],
             [$this->matches('create sql stmt'), 1],
             [$this->stringContains('INSERT INTO'), 1],
         ];
@@ -256,7 +256,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $conn->method('isTransactionActive')
             ->willReturn(false);
 
-        $platform = $this->createMock(AbstractPlatform::class);
+        $platform = $this->createStub(AbstractPlatform::class);
         $platform->method(method_exists(AbstractPlatform::class, 'getCreateTablesSQL') ? 'getCreateTablesSQL' : 'getCreateTableSQL')
             ->willReturn(['create sql stmt']);
 
@@ -272,7 +272,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
     public function testConfigureSchemaDifferentDatabase()
     {
-        $conn = $this->createMock(Connection::class);
+        $conn = $this->createStub(Connection::class);
         $someFunction = fn () => false;
         $schema = new Schema();
 
@@ -283,7 +283,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
     public function testConfigureSchemaSameDatabase()
     {
-        $conn = $this->createMock(Connection::class);
+        $conn = $this->createStub(Connection::class);
         $someFunction = fn () => true;
         $schema = new Schema();
 
@@ -294,7 +294,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
     public function testConfigureSchemaTableExists()
     {
-        $conn = $this->createMock(Connection::class);
+        $conn = $this->createStub(Connection::class);
         $schema = new Schema();
         $schema->createTable('lock_keys');
 

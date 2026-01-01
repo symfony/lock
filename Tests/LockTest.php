@@ -81,11 +81,10 @@ class LockTest extends TestCase
     public function testAcquireBlockingRetryWithPersistingStoreInterface()
     {
         $key = new Key(uniqid(__METHOD__, true));
-        $store = $this->createMock(PersistingStoreInterface::class);
+        $store = $this->createStub(PersistingStoreInterface::class);
         $lock = new Lock($key, $store);
 
         $store
-            ->expects($this->any())
             ->method('save')
             ->willReturnCallback(static function () {
                 if (1 === random_int(0, 1)) {
@@ -210,7 +209,7 @@ class LockTest extends TestCase
     public function testIsAquired()
     {
         $key = new Key(uniqid(__METHOD__, true));
-        $store = $this->createMock(PersistingStoreInterface::class);
+        $store = $this->createStub(PersistingStoreInterface::class);
         $lock = new Lock($key, $store, 10);
 
         $store
@@ -403,7 +402,7 @@ class LockTest extends TestCase
     public function testExpiration($ttls, $expected)
     {
         $key = new Key(uniqid(__METHOD__, true));
-        $store = $this->createMock(PersistingStoreInterface::class);
+        $store = $this->createStub(PersistingStoreInterface::class);
         $lock = new Lock($key, $store, 10);
 
         foreach ($ttls as $ttl) {
@@ -422,7 +421,7 @@ class LockTest extends TestCase
     public function testExpirationStoreInterface($ttls, $expected)
     {
         $key = new Key(uniqid(__METHOD__, true));
-        $store = $this->createMock(PersistingStoreInterface::class);
+        $store = $this->createStub(PersistingStoreInterface::class);
         $lock = new Lock($key, $store, 10);
 
         foreach ($ttls as $ttl) {
@@ -569,11 +568,10 @@ class LockTest extends TestCase
     public function testAcquireReadBlockingWithSharedLockStoreInterface()
     {
         $key = new Key(uniqid(__METHOD__, true));
-        $store = $this->createMock(SharedLockStoreInterface::class);
+        $store = $this->createStub(SharedLockStoreInterface::class);
         $lock = new Lock($key, $store);
 
         $store
-            ->expects($this->any())
             ->method('saveRead')
             ->willReturnCallback(static function () {
                 if (1 === random_int(0, 1)) {
@@ -607,11 +605,10 @@ class LockTest extends TestCase
     public function testAcquireReadBlockingWithPersistingStoreInterface()
     {
         $key = new Key(uniqid(__METHOD__, true));
-        $store = $this->createMock(PersistingStoreInterface::class);
+        $store = $this->createStub(PersistingStoreInterface::class);
         $lock = new Lock($key, $store);
 
         $store
-            ->expects($this->any())
             ->method('save')
             ->willReturnCallback(static function () {
                 if (1 === random_int(0, 1)) {
