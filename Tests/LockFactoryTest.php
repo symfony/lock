@@ -12,7 +12,7 @@
 namespace Symfony\Component\Lock\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\PersistingStoreInterface;
@@ -37,9 +37,8 @@ class LockFactoryTest extends TestCase
                 return true;
             }));
 
-        $logger = $this->createMock(LoggerInterface::class);
         $factory = new LockFactory($store);
-        $factory->setLogger($logger);
+        $factory->setLogger(new NullLogger());
 
         $lock1 = $factory->createLock('foo');
         $lock2 = $factory->createLock('foo');
@@ -66,9 +65,8 @@ class LockFactoryTest extends TestCase
                 return true;
             }));
 
-        $logger = $this->createMock(LoggerInterface::class);
         $factory = new LockFactory($store);
-        $factory->setLogger($logger);
+        $factory->setLogger(new NullLogger());
 
         $key = new Key('foo');
         $lock1 = $factory->createLockFromKey($key);
