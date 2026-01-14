@@ -262,8 +262,8 @@ class CombinedStoreTest extends AbstractStoreTestCase
 
     public function testPutOffExpirationIgnoreNonExpiringStorage()
     {
-        $store1 = $this->createMock(PersistingStoreInterface::class);
-        $store2 = $this->createMock(PersistingStoreInterface::class);
+        $store1 = $this->createStub(PersistingStoreInterface::class);
+        $store2 = $this->createStub(PersistingStoreInterface::class);
 
         $store = new CombinedStore([$store1, $store2], $this->strategy);
 
