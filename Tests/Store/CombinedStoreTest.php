@@ -284,8 +284,9 @@ class CombinedStoreTest extends AbstractStoreTestCase
     {
         $key = new Key(__METHOD__);
 
-        $store1 = $this->createStub(BlockingStoreInterface::class);
+        $store1 = $this->createMock(BlockingStoreInterface::class);
         $store1
+            ->expects($this->once())
             ->method('exists')
             ->with($key)
             ->willReturn(false);
@@ -311,8 +312,9 @@ class CombinedStoreTest extends AbstractStoreTestCase
     {
         $key = new Key(__METHOD__);
 
-        $store1 = $this->createStub(BlockingStoreInterface::class);
+        $store1 = $this->createMock(BlockingStoreInterface::class);
         $store1
+            ->expects($this->once())
             ->method('exists')
             ->with($key)
             ->willReturn(false);
