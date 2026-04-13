@@ -139,7 +139,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
         $conn->expects($this->atLeast(3))
             ->method('executeStatement')
-            ->willReturnCallback(function ($sql) use (&$series) {
+            ->willReturnCallback(static function ($sql) use (&$series) {
                 if ([$constraint, $return] = array_shift($series)) {
                     $constraint->evaluate($sql);
                 }
@@ -198,7 +198,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
         $conn->expects($this->atLeast(2))
             ->method('executeStatement')
-            ->willReturnCallback(function ($sql) use (&$series) {
+            ->willReturnCallback(static function ($sql) use (&$series) {
                 if ([$constraint, $return] = array_shift($series)) {
                     $constraint->evaluate($sql);
                 }
@@ -240,7 +240,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
         $conn->expects($this->atLeast(3))
             ->method('executeStatement')
-            ->willReturnCallback(function ($sql) use (&$series) {
+            ->willReturnCallback(static function ($sql) use (&$series) {
                 if ([$constraint, $return] = array_shift($series)) {
                     $constraint->evaluate($sql);
                 }
@@ -273,7 +273,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
     public function testConfigureSchemaDifferentDatabase()
     {
         $conn = $this->createStub(Connection::class);
-        $someFunction = fn () => false;
+        $someFunction = static fn () => false;
         $schema = new Schema();
 
         $dbalStore = new DoctrineDbalStore($conn);
@@ -284,7 +284,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
     public function testConfigureSchemaSameDatabase()
     {
         $conn = $this->createStub(Connection::class);
-        $someFunction = fn () => true;
+        $someFunction = static fn () => true;
         $schema = new Schema();
 
         $dbalStore = new DoctrineDbalStore($conn);
@@ -299,7 +299,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $schema->createTable('lock_keys');
 
         $dbalStore = new DoctrineDbalStore($conn);
-        $someFunction = fn () => true;
+        $someFunction = static fn () => true;
         $dbalStore->configureSchema($schema, $someFunction);
         $table = $schema->getTable('lock_keys');
         $this->assertEmpty($table->getColumns(), 'The table was not overwritten');
