@@ -90,7 +90,7 @@ class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
             );
 
             // Silence error reporting
-            set_error_handler(function ($type, $msg) use (&$error) { $error = $msg; });
+            set_error_handler(static function ($type, $msg) use (&$error) { $error = $msg; });
             try {
                 if (!$handle = fopen($fileName, 'r+') ?: fopen($fileName, 'r')) {
                     if ($handle = fopen($fileName, 'x')) {
