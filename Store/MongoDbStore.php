@@ -94,7 +94,6 @@ class MongoDbStore implements PersistingStoreInterface
      * readConcern is not specified by MongoDbStore meaning the connection's settings will take effect.
      * writeConcern is majority for all update queries.
      * readPreference is primary for all read queries.
-     *
      * @see https://docs.mongodb.com/manual/applications/replication/
      */
     public function __construct(Collection|Database|Client|Manager|string $mongo, array $options = [], float $initialTtl = 300.0)
@@ -312,7 +311,7 @@ class MongoDbStore implements PersistingStoreInterface
                 'projection' => ['_id' => 1],
             ]
         ), [
-            'readPreference' => new ReadPreference(ReadPreference::PRIMARY)
+            'readPreference' => new ReadPreference(ReadPreference::PRIMARY),
         ]);
 
         return [] !== $cursor->toArray();
