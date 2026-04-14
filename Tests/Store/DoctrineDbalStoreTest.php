@@ -181,7 +181,7 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
 
         if (interface_exists(Exception::class)) {
             // DBAL 4+
-            yield [\Doctrine\DBAL\Platforms\SQLitePlatform::class];
+            yield [SQLitePlatform::class];
         } else {
             yield [\Doctrine\DBAL\Platforms\SqlitePlatform::class];
         }
@@ -312,3 +312,5 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         $this->assertSame([], $table->getColumns(), 'The table was not overwritten');
     }
 }
+
+// @php-cs-fixer-ignore fully_qualified_strict_types
