@@ -18,6 +18,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Schema\Schema;
+use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\DoctrineDbalStore;
@@ -121,6 +122,98 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
         } finally {
             $pdo = new \PDO('pgsql:host='.$host.';user=postgres;password=password');
             $pdo->exec('DROP TABLE IF EXISTS lock_keys');
+        }
+    }
+
+    /**
+     * @requires extension pdo_pgsql
+     *
+     * @group integration
+     */
+    public function testSaveDoesNotAbortSurroundingPostgresTransactionOnLockContention()
+    {
+        if (!$host = getenv('POSTGRES_HOST')) {
+            $this->markTestSkipped('Missing POSTGRES_HOST env variable');
+        }
+
+        $config = new Configuration();
+        if (class_exists(DefaultSchemaManagerFactory::class)) {
+            $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+        }
+        $conn = DriverManager::getConnection([
+            'driver' => 'pdo_pgsql',
+            'host' => $host,
+            'user' => 'postgres',
+            'password' => 'password',
+        ], $config);
+
+        $resource = uniqid(__METHOD__, true);
+
+        try {
+            $store = new DoctrineDbalStore($conn);
+            $store->createTable();
+
+            $owner = new Key($resource);
+            $store->save($owner);
+
+            $conn->beginTransaction();
+
+            $contender = new Key($resource);
+            try {
+                $store->save($contender);
+                $this->fail('LockConflictedException was expected.');
+            } catch (LockConflictedException) {
+                // expected
+            }
+
+            $this->assertSame('alive', $conn->fetchOne("SELECT 'alive'"), 'The surrounding transaction must remain usable after a lock conflict.');
+            $conn->rollBack();
+        } finally {
+            if ($conn->isTransactionActive()) {
+                $conn->rollBack();
+            }
+            $conn->executeStatement('DROP TABLE IF EXISTS lock_keys');
+        }
+    }
+
+    /**
+     * @requires extension pdo_pgsql
+     *
+     * @group integration
+     */
+    public function testSavePostgresRefreshesSameKeyInsideTransaction()
+    {
+        if (!$host = getenv('POSTGRES_HOST')) {
+            $this->markTestSkipped('Missing POSTGRES_HOST env variable');
+        }
+
+        $config = new Configuration();
+        if (class_exists(DefaultSchemaManagerFactory::class)) {
+            $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+        }
+        $conn = DriverManager::getConnection([
+            'driver' => 'pdo_pgsql',
+            'host' => $host,
+            'user' => 'postgres',
+            'password' => 'password',
+        ], $config);
+
+        try {
+            $store = new DoctrineDbalStore($conn);
+            $store->createTable();
+
+            $key = new Key(uniqid(__METHOD__, true));
+            $store->save($key);
+
+            $conn->beginTransaction();
+            $store->save($key);
+            $this->assertTrue($store->exists($key));
+            $conn->rollBack();
+        } finally {
+            if ($conn->isTransactionActive()) {
+                $conn->rollBack();
+            }
+            $conn->executeStatement('DROP TABLE IF EXISTS lock_keys');
         }
     }
 
