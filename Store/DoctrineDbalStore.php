@@ -103,7 +103,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
         $key->reduceLifetime($this->initialTtl);
 
         $platform = $this->conn->getDatabasePlatform();
-        if ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $this->doSavePostgres($key);
         } else {
             $this->doSave($key);
