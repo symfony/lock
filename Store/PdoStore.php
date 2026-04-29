@@ -145,7 +145,7 @@ class PdoStore implements PersistingStoreInterface
             ." WHERE $this->table.$this->tokenCol = EXCLUDED.$this->tokenCol OR $this->table.$this->expirationCol <= $now";
 
         $conn = $this->getConnection();
-        $id = $this->getHashedKey($key);
+        $id = $this->getKeyName($key);
         $token = $this->getUniqueToken($key);
 
         try {
