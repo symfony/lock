@@ -33,6 +33,10 @@ class SemaphoreStore implements BlockingStoreInterface
         return \extension_loaded('sysvsem');
     }
 
+    /**
+     * @param string $projectId A scoping prefix folded into the System V key derivation to isolate one
+     *                          application's semaphore namespace from another's running on the same host
+     */
     public function __construct(
         private readonly string $projectId = '',
     ) {

@@ -14,6 +14,7 @@ namespace Symfony\Component\Lock\Tests\Store;
 use AsyncAws\DynamoDb\DynamoDbClient;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\AbstractAdapter;
 use Symfony\Component\Cache\Adapter\MemcachedAdapter;
@@ -41,6 +42,15 @@ class StoreFactoryTest extends TestCase
         $store = StoreFactory::createStore($connection);
 
         $this->assertInstanceOf($expectedStoreClass, $store);
+    }
+
+    #[RequiresPhpExtension('sysvsem')]
+    public function testCreateSemaphoreStoreDecodesProjectId()
+    {
+        $store = StoreFactory::createStore('semaphore://my%20project%2Fid');
+
+        $this->assertInstanceOf(SemaphoreStore::class, $store);
+        $this->assertSame('my project/id', (new \ReflectionProperty(SemaphoreStore::class, 'projectId'))->getValue($store));
     }
 
     public static function validConnections(): \Generator

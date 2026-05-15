@@ -12,6 +12,7 @@
 namespace Symfony\Component\Lock\Tests\Store;
 
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\SemaphoreStore;
@@ -46,6 +47,7 @@ class SemaphoreStoreTest extends AbstractStoreTestCase
 
     public function testProjectIdSeparatesLocks()
     {
+        $initialCount = $this->getOpenedSemaphores();
         $keyName = __METHOD__;
         $storeA = new SemaphoreStore('project-a');
         $storeB = new SemaphoreStore('project-b');
@@ -56,10 +58,30 @@ class SemaphoreStoreTest extends AbstractStoreTestCase
         $storeA->save($keyA);
         $storeB->save($keyB);
 
+        $this->assertSame($initialCount + 2, $this->getOpenedSemaphores(), 'Two distinct semaphores should be opened for the same key under different project IDs');
+
         $storeA->delete($keyA);
         $storeB->delete($keyB);
+    }
 
-        $this->addToAssertionCount(1);
+    public function testSameProjectIdCollidesOnSameKey()
+    {
+        $keyName = __METHOD__;
+        $storeA = new SemaphoreStore('shared-project');
+        $storeB = new SemaphoreStore('shared-project');
+
+        $keyA = new Key($keyName);
+        $keyB = new Key($keyName);
+
+        $storeA->save($keyA);
+
+        try {
+            $this->expectException(LockConflictedException::class);
+            $storeB->save($keyB);
+        } finally {
+            $storeA->delete($keyA);
+            $storeB->delete($keyB);
+        }
     }
 
     private function getOpenedSemaphores()

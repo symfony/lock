@@ -68,7 +68,7 @@ class StoreFactory
                 return new SemaphoreStore();
 
             case str_starts_with($connection, 'semaphore://'):
-                return new SemaphoreStore(substr($connection, 12));
+                return new SemaphoreStore(rawurldecode(substr($connection, 12)));
 
             case str_starts_with($connection, 'dynamodb://'):
                 self::requireBridgeClass(DynamoDbStore::class, 'symfony/amazon-dynamo-db-lock');
