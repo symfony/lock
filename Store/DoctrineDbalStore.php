@@ -245,8 +245,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
      */
     public function createTable(): void
     {
-        $initialSchema = new Schema();
-        $schema = $this->configureSchema($initialSchema, static fn () => true) ?? $initialSchema;
+        $schema = $this->configureSchema(new Schema(), static fn () => true);
 
         foreach ($schema->toSql($this->conn->getDatabasePlatform()) as $sql) {
             $this->conn->executeStatement($sql);
@@ -255,10 +254,8 @@ class DoctrineDbalStore implements PersistingStoreInterface
 
     /**
      * Adds the Table to the Schema if it doesn't exist.
-     *
-     * @return Schema The (possibly new) schema with the table added
      */
-    public function configureSchema(Schema $schema, \Closure $isSameDatabase)
+    public function configureSchema(Schema $schema, \Closure $isSameDatabase): Schema
     {
         if ($schema->hasTable($this->table)) {
             return $schema;
