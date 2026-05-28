@@ -23,7 +23,6 @@ use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Schema\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Key;
@@ -35,8 +34,6 @@ use Symfony\Component\Lock\Test\AbstractStoreTestCase;
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
 #[RequiresPhpExtension('pdo_sqlite')]
-#[IgnoreDeprecations]
-#[Group('doctrine-dbal-workaround')]
 class DoctrineDbalStoreTest extends AbstractStoreTestCase
 {
     use ExpiringStoreTestTrait;
@@ -348,34 +345,31 @@ class DoctrineDbalStoreTest extends AbstractStoreTestCase
     public function testConfigureSchemaDifferentDatabase()
     {
         $conn = $this->createStub(Connection::class);
-        $someFunction = static fn () => false;
-        $schema = new Schema();
-
         $dbalStore = new DoctrineDbalStore($conn);
-        $dbalStore->configureSchema($schema, $someFunction);
+        $schema = $dbalStore->configureSchema(new Schema(), static fn () => false);
         $this->assertFalse($schema->hasTable('lock_keys'));
     }
 
     public function testConfigureSchemaSameDatabase()
     {
         $conn = $this->createStub(Connection::class);
-        $someFunction = static fn () => true;
-        $schema = new Schema();
-
         $dbalStore = new DoctrineDbalStore($conn);
-        $dbalStore->configureSchema($schema, $someFunction);
+        $schema = $dbalStore->configureSchema(new Schema(), static fn () => true);
         $this->assertTrue($schema->hasTable('lock_keys'));
     }
 
     public function testConfigureSchemaTableExists()
     {
-        $conn = $this->createStub(Connection::class);
-        $schema = new Schema();
-        $schema->createTable('lock_keys');
+        if (method_exists(Schema::class, 'edit')) {
+            $schema = (new Schema())->edit()->addTable(new \Doctrine\DBAL\Schema\Table('lock_keys'))->create();
+        } else {
+            $schema = new Schema();
+            $schema->createTable('lock_keys');
+        }
 
+        $conn = $this->createStub(Connection::class);
         $dbalStore = new DoctrineDbalStore($conn);
-        $someFunction = static fn () => true;
-        $dbalStore->configureSchema($schema, $someFunction);
+        $schema = $dbalStore->configureSchema($schema, static fn () => true);
         $table = $schema->getTable('lock_keys');
         $this->assertSame([], $table->getColumns(), 'The table was not overwritten');
     }

@@ -27,6 +27,7 @@ use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Tools\DsnParser;
 use Symfony\Component\Lock\Exception\InvalidArgumentException;
 use Symfony\Component\Lock\Exception\InvalidTtlException;
@@ -244,8 +245,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
      */
     public function createTable(): void
     {
-        $schema = new Schema();
-        $this->configureSchema($schema, static fn () => true);
+        $schema = $this->configureSchema(new Schema(), static fn () => true);
 
         foreach ($schema->toSql($this->conn->getDatabasePlatform()) as $sql) {
             $this->conn->executeStatement($sql);
@@ -257,17 +257,30 @@ class DoctrineDbalStore implements PersistingStoreInterface
      *
      * @param-immediately-invoked-callable $isSameDatabase
      */
-    public function configureSchema(Schema $schema, \Closure $isSameDatabase): void
+    public function configureSchema(Schema $schema, \Closure $isSameDatabase): Schema
     {
         if ($schema->hasTable($this->table)) {
-            return;
+            return $schema;
         }
 
         if (!$isSameDatabase($this->conn->executeStatement(...))) {
-            return;
+            return $schema;
         }
 
-        $table = $schema->createTable($this->table);
+        if (method_exists($schema, 'edit')) {
+            $table = new Table($this->table);
+            $this->configureSchemaTable($table);
+
+            return $schema->edit()->addTable($table)->create();
+        }
+
+        $this->configureSchemaTable($schema->createTable($this->table));
+
+        return $schema;
+    }
+
+    private function configureSchemaTable(Table $table): void
+    {
         $table->addColumn($this->idCol, 'string', ['length' => 64]);
         $table->addColumn($this->tokenCol, 'string', ['length' => 44]);
         $table->addColumn($this->expirationCol, 'integer', ['unsigned' => true]);
