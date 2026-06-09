@@ -91,6 +91,10 @@ final class Key implements \Stringable
 
     public function __unserialize(array $data): void
     {
+        if (($data['resource'] ?? $data["\0".self::class."\0resource"] ?? null) instanceof \Stringable) {
+            throw new \BadMethodCallException('Cannot unserialize '.self::class);
+        }
+
         $this->resource = $data['resource'] ?? $data["\0".self::class."\0resource"];
         $this->expiringTime = $data['expiringTime'] ?? $data["\0".self::class."\0expiringTime"] ?? null;
         $this->state = $data['state'] ?? $data["\0".self::class."\0state"] ?? [];
