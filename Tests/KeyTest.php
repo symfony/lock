@@ -50,4 +50,36 @@ class KeyTest extends TestCase
         $this->expectException(UnserializableKeyException::class);
         serialize($key);
     }
+
+    public function testUnserializeRejectsStringableTrampoline()
+    {
+        $data = ['resource' => new KeyTestToStringGadget(), 'expiringTime' => null, 'state' => []];
+        $payload = \sprintf('O:%d:"%s":%d:{', \strlen(Key::class), Key::class, \count($data));
+        foreach ($data as $key => $value) {
+            $payload .= serialize($key).serialize($value);
+        }
+        $payload .= '}';
+
+        KeyTestToStringGadget::$fired = false;
+
+        try {
+            unserialize($payload, ['allowed_classes' => [Key::class, KeyTestToStringGadget::class]]);
+            $this->fail('Expected BadMethodCallException.');
+        } catch (\BadMethodCallException $e) {
+        }
+
+        $this->assertFalse(KeyTestToStringGadget::$fired, '__toString gadget must not fire during unserialize');
+    }
+}
+
+class KeyTestToStringGadget
+{
+    public static bool $fired = false;
+
+    public function __toString(): string
+    {
+        self::$fired = true;
+
+        return '';
+    }
 }
