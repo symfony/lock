@@ -22,6 +22,7 @@ use Doctrine\DBAL\Platforms\OraclePlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
@@ -268,10 +269,7 @@ class DoctrineDbalStore implements PersistingStoreInterface
         }
 
         if (method_exists($schema, 'edit')) {
-            $table = new Table($this->table);
-            $this->configureSchemaTable($table);
-
-            return $schema->edit()->addTable($table)->create();
+            return $schema->edit()->addTable($this->buildSchemaTable())->create();
         }
 
         $this->configureSchemaTable($schema->createTable($this->table));
@@ -279,6 +277,20 @@ class DoctrineDbalStore implements PersistingStoreInterface
         return $schema;
     }
 
+    private function buildSchemaTable(): Table
+    {
+        return Table::editor()
+            ->setUnquotedName($this->table)
+            ->addColumn(Column::editor()->setUnquotedName($this->idCol)->setTypeName('string')->setLength(64)->create())
+            ->addColumn(Column::editor()->setUnquotedName($this->tokenCol)->setTypeName('string')->setLength(44)->create())
+            ->addColumn(Column::editor()->setUnquotedName($this->expirationCol)->setTypeName('integer')->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted($this->idCol))], true))
+            ->create();
+    }
+
+    /**
+     * To be removed when doctrine/dbal minimum is bumped to ^4.5.
+     */
     private function configureSchemaTable(Table $table): void
     {
         $table->addColumn($this->idCol, 'string', ['length' => 64]);
